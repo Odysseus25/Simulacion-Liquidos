@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
+using System.Collections.Generic;
 
 /*
  * 	Clase: Controlador
@@ -19,16 +20,19 @@ public class Controlador : MonoBehaviour {
 	public int tamano_y;  		// tamaño de la dimensión Y del entorno (en celdas)
 	public int tamano_z;		// tamaño de la dimensión Z del entorno (en celdas)
 	public float sensibilidad = 0.1f;
+	
 
 	public Heightmaps heightmap;	// mapa de alturas seleccionado para la simulacion
 
 	public Transform center;
 	public Slider sdelay_slider;
+	public GameObject combinedTerrainObj;
 
 	public static Controlador controlador;
 	public static Espacio espacio;
 	public static EspRenderer esp_renderer; 
 	public static MapLoader map_loader;
+	//public static Combiner combine;
 	int frame_delay = 0;
 	int frames = 0;
 	bool simulation_paused = false;
@@ -52,8 +56,12 @@ public class Controlador : MonoBehaviour {
 				return "/Resources/maps/hm1.png";
 			case Heightmaps.Playground:
 				return "/Resources/maps/hm8.png";
+			case Heightmaps.prueba:
+				return "/Resources/maps/hm2.png";
+			case Heightmaps.test:
+			return "/Resources/maps/hm5_100.png";
 			default:
-				return "/Resources/maps/hm5.png";
+				return "/Resources/maps/hm2.png";
 		}
 	}
 
@@ -84,6 +92,12 @@ public class Controlador : MonoBehaviour {
 
 		espacio.rend = esp_renderer;
 		esp_renderer.inicializar (espacio);
+
+
+			//GameObject combinedTerrainObj = Instantiate(Resources.Load("CeldaTerreno", typeof(GameObject))) as GameObject;
+			//esp_renderer.CombineTerrain(combinedTerrainObj);
+
+
 	
 	}
 

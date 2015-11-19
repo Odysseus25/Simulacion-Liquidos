@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public enum Heightmaps {Canyon, Hills, Pool, Playground};
+public enum Heightmaps {Canyon, Hills, Pool, Playground, prueba, test};
 
 /*
  * 	Clase: PersistentData

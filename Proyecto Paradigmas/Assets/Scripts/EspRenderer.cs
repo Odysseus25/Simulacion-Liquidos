@@ -24,6 +24,25 @@ public class EspRenderer : MonoBehaviour {
 	bool deleted_from_actives = false;
 	bool deleted_from_scheduled = false;
 
+	//el terreno
+	public GameObject terrain;
+	//celdas de terreno combinadas
+	public Transform combinedMeshParent;
+	public Transform individualTerrainParent;
+
+	
+	//numero de vertices permitidos por grupo
+	[System.NonSerialized]
+	public int vertexLimit = 65000;
+	
+	//lista que contiene todas las celdas unificadas del terreno
+	[System.NonSerialized]
+	public List<GameObject> combinedterrainList = new List<GameObject>();
+	
+	//lista que contiene todos los gameObjects que representan el terreno.
+	[System.NonSerialized]
+	public List<GameObject> allTerrain = new List<GameObject>();
+
 	/*
 	 * 	Funcion: inicializar()
 	 * 
@@ -162,6 +181,8 @@ public class EspRenderer : MonoBehaviour {
 			GameObject nuevaCelda = terrain_pool.instanciarCelda (new Vector3 (celda.indice_x, celda.indice_y, celda.indice_z));
 			//nuevaCelda.GetComponent<MeshRenderer> ().material = solid_material;
 			celda.linkRenderTerreno (nuevaCelda);
+			//nuevaCelda.transform.parent = individualTerrainParent;
+			allTerrain.Add(nuevaCelda);
 			actualizarCelda (celda);
 		}
 	}
@@ -179,4 +200,86 @@ public class EspRenderer : MonoBehaviour {
 		rcelda_trans.position = new Vector3 (celda.indice_x, celda.indice_y + celda.getSaturacion()/2 - 0.5f, celda.indice_z);
 	}
 
+	/*
+	 *	Funcion: CombineTerrain()
+	 *
+	 *
+	 *	
+	 *		
+	 */
+	public void CombineTerrain(GameObject combinedTerrainObj){
+		List<CombineInstance> terrainList = new List<CombineInstance>();
+		CombineInstance combine = new CombineInstance();
+
+		int verticesActuales = 0;
+		int meshListCounter = 0;
+
+		for(int i = 0; i < allTerrain.Count; i++){
+			allTerrain[i].SetActive(false);
+			//allTerrain[i].GetComponent<TerrainData>().listPos = meshListCounter;
+
+			MeshFilter[] meshFilters = allTerrain[i].GetComponentsInChildren<MeshFilter>(true);
+
+			for(int j = 0; j < meshFilters.Length; j++){
+				MeshFilter meshFilter = meshFilters[j];
+				combine.mesh = meshFilter.mesh;
+				combine.transform = meshFilter.transform.localToWorldMatrix;
+
+				//se agrega a la lista 
+				terrainList.Add(combine);
+
+				verticesActuales += meshFilter.mesh.vertexCount;
+			}
+
+			//se excede el limite de vertices?
+			if(verticesActuales > vertexLimit){
+				i =-1; 
+				terrainList.RemoveAt(terrainList.Count - 1);
+
+				CreateCombinedMesh(terrainList, combinedTerrainObj, combinedterrainList);
+				terrainList.Clear();
+				verticesActuales = 0;
+				meshListCounter += 1;
+			}
+		}
+		CreateCombinedMesh(terrainList, combinedTerrainObj, combinedterrainList);
+	}
+
+
+	public void CreateCombinedMesh(List<CombineInstance> meshDataList, GameObject meshHolderObj, List<GameObject> combinedHolderList){
+		//crear nuevo mesh combinado
+		Mesh newMesh = new Mesh();
+		newMesh.CombineMeshes(meshDataList.ToArray());
+
+		//crear nuevo objeto que va a contener el mesh combinado
+		GameObject combinedMeshHolder = Instantiate(meshHolderObj, Vector3.zero, Quaternion.identity) as GameObject;
+
+		combinedMeshHolder.transform.parent = combinedMeshParent;
+
+		//agregamos el mesh
+		combinedMeshHolder.GetComponent<MeshFilter>().mesh = newMesh;
+		combinedHolderList.Add(combinedMeshHolder);
+	}
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

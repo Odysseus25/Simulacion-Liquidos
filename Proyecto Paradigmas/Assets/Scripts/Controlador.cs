@@ -59,7 +59,7 @@ public class Controlador : MonoBehaviour {
 			case Heightmaps.prueba:
 				return "/Resources/maps/hm2.png";
 			case Heightmaps.test:
-			return "/Resources/maps/hm5_100.png";
+			return "/Resources/maps/hm5_200.png";
 			default:
 				return "/Resources/maps/hm2.png";
 		}

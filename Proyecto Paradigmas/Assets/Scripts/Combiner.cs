@@ -8,7 +8,6 @@ public class Combiner : MonoBehaviour {
 	int vertexSoFar = 0;
 	int vertexLimit = 65000;
 	int iterador = 0;
-	bool done = false;
 	
 	void Start()
 	{

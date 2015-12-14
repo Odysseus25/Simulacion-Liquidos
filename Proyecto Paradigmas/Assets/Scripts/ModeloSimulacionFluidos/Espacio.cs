@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
 
 /*
  * 	Clase: Espacio
@@ -24,6 +25,9 @@ public class Espacio {
 	public List<Celda> celdas_de_terreno;		// lista de celdas de terreno
 
 	public EspRenderer rend;
+	public ManualResetEvent[] threads;	//necesario para el threadpool
+	private ManualResetEvent doneEvent;
+	//private Celda cellda;
 
 	bool simulacionEnProgreso = false;
 	Vector3 sicStartPosition;
@@ -44,6 +48,7 @@ public class Espacio {
 		this.tamano_y = tamano_y;
 		this.tamano_z = tamano_z;
 		this.sensibilidad = sensibilidad;
+		threads = new ManualResetEvent[100];
 
 		Controlador.controlador.center.position = new Vector3 (tamano_x/2, tamano_y/4, tamano_z/2);
 		celdas_de_terreno = new List<Celda> ();
@@ -241,9 +246,15 @@ public class Espacio {
 	 */
 	public void simularTick() {
 		simulacionEnProgreso = true;
-
-		for (int i = 0; i < celdas_activas.Count; ++i) {
-			simularTickCelda(celdas_activas[i]);
+		//Debug.Log (celdas_activas.Count);
+		if(celdas_activas.Count != 0){
+			for (int i = 0; i < celdas_activas.Count; ++i) {
+				//cellda = celdas_activas[i];
+				threads[i%100] = new ManualResetEvent(false);
+				//Celda cell = celdas_activas[i];
+				ThreadPool.QueueUserWorkItem(simularTickCelda, celdas_activas[i]);
+			}
+			//WaitHandle.WaitAll(threads);
 		}
 
 		float sat_tot_tick_actual = saturacion_total;
@@ -257,6 +268,18 @@ public class Espacio {
 		sat_tot_tick_anterior = saturacion_total;
 	}
 
+
+	/*ManualResetEvent waithandle = new ManualResetEvent(false);
+	waithandles.Add(waithandle);
+	Thread liquid  = new Thread(new ThreadStart(() => {	simularTickCelda(celdas_activas[i]);
+		waithandle.Set();
+	}));
+	liquid.Start();
+	//simularTickCelda(celdas_activas[i])
+	//a;adir un tread por cada una de las celdas activas 
+}
+WaitHandle.WaitAll(waithandles.ToArray());*/
+
 	/*
 	 * 	Funcion: simularTickCelda()
 	 * 
@@ -264,7 +287,9 @@ public class Espacio {
 	 * 
 	 * 	<celda> no debe ser solida, y su saturacion debe ser mayor que 0 (de lo contrario no hay liquido que distribuir en <celda>).
 	 */
-	void simularTickCelda(Celda celda) {
+	void simularTickCelda(object state) {
+		Celda celda = (Celda)state;
+		//Celda celda = cellda;
 		if (!celda.es_solido && celda.saturacion > 0f) {
 
 			// DEBUG BREAKPOINT
@@ -276,6 +301,7 @@ public class Espacio {
 			// END OF DEBUG BREAKPOINT
 
 			celda.distribuirLiquido ();
+			doneEvent.Set();
 		}
 	}
 

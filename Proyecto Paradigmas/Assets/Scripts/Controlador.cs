@@ -2,6 +2,7 @@
 using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
 
 /*
  * 	Clase: Controlador
@@ -27,6 +28,9 @@ public class Controlador : MonoBehaviour {
 	public Transform center;
 	public Slider sdelay_slider;
 	public GameObject combinedTerrainObj;
+
+	//List<WaitHandle> waitHandles;
+
 
 	public static Controlador controlador;
 	public static Espacio espacio;
@@ -78,7 +82,7 @@ public class Controlador : MonoBehaviour {
 	void Start () {
 
 		controlador = this;
-
+		
 		if (PersistentData.GlobalData != null && PersistentData.GlobalData.heightmapSelected) {
 			heightmap = PersistentData.GlobalData.heightmap;
 		}
@@ -92,7 +96,6 @@ public class Controlador : MonoBehaviour {
 
 		espacio.rend = esp_renderer;
 		esp_renderer.inicializar (espacio);
-
 
 			//GameObject combinedTerrainObj = Instantiate(Resources.Load("CeldaTerreno", typeof(GameObject))) as GameObject;
 			//esp_renderer.CombineTerrain(combinedTerrainObj);
